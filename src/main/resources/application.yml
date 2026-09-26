@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: game-matchmaking-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:matchmaking}
+    username: ${POSTGRES_USER:matchmaking}
+    password: ${POSTGRES_PASSWORD:matchmaking}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: matchmaking
+      auto-offset-reset: earliest
+    producer:
+      acks: all
+  mvc:
+    problemdetails:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+matchmaking:
+  min-level: 20
+  entry-fee: 1000
+  starting-coins: 5000
+  first-place-reward: 10000
+  second-place-reward: 5000
+  reconcile:
+    interval: 30s
+    stale-after: 60s
