@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.yagiztufek.matchmaking.common.Country;
@@ -61,11 +62,12 @@ public class MatchmakingQueue {
         keys.add(queuedSetKey(tournamentId));
 
         List<?> popped = redis.execute(POP_MATCH, keys);
-        if (popped == null || popped.isEmpty()) {
+        Country[] countries = Country.values();
+        if (popped == null || popped.size() != countries.length
+                || popped.stream().anyMatch(Objects::isNull)) {
             return Optional.empty();
         }
         Map<Country, Long> players = new LinkedHashMap<>();
-        Country[] countries = Country.values();
         for (int i = 0; i < countries.length; i++) {
             players.put(countries[i], Long.parseLong(popped.get(i).toString()));
         }
