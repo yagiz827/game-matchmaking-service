@@ -14,7 +14,7 @@
   "postCreateCommand": "./mvnw -B -q dependency:go-offline",
   "customizations": {
     "vscode": {
-      "extensions": ["vscjava.vscode-java-pack", "vmware.vscode-boot-dev-pack"]
+      "extensions": ["vscjava.vscode-java-pack", "vmware.vscode-boot-dev-pack", "humao.rest-client"]
     }
   }
 }

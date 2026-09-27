@@ -1,0 +1,100 @@
+### Example requests for the matchmaking API.
+### Open in VS Code with the REST Client extension (humao.rest-client) or in IntelliJ,
+### then click "Send Request" above a request. Run them top to bottom: later requests
+### reuse ids from earlier responses via named requests (# @name).
+###
+### Start the stack first:  docker compose up --build   (or run the app against
+### `docker compose up postgres redis kafka`)
+
+@base = http://localhost:8080/api/v1
+
+### ---------------------------------------------------------------- Health
+
+GET http://localhost:8080/actuator/health
+
+### ---------------------------------------------------------------- Players
+
+# @name createPlayer
+POST {{base}}/players
+Content-Type: application/json
+
+{
+  "username": "yagiz-{{$randomInt 1000 9999}}",
+  "country": "TR"
+}
+
+###
+
+@playerId = {{createPlayer.response.body.$.id}}
+
+### Get the player
+GET {{base}}/players/{{playerId}}
+
+### Level up (+1 level, +25 coins). Entering a tournament needs level 20,
+### so send this 19 times for a new player, or lower matchmaking.min-level.
+POST {{base}}/players/{{playerId}}/level-up
+
+### Create a player without a country: one is assigned at random
+POST {{base}}/players
+Content-Type: application/json
+
+{
+  "username": "random-{{$randomInt 1000 9999}}"
+}
+
+### ---------------------------------------------------------------- Tournaments
+
+# @name createTournament
+POST {{base}}/tournaments
+
+###
+
+@tournamentId = {{createTournament.response.body.$.id}}
+
+### Get the tournament
+GET {{base}}/tournaments/{{tournamentId}}
+
+### Enter the tournament. Returns 202 Accepted; matchmaking continues in the background.
+### Expect 422 if the player is below the minimum level or can't pay the entry fee,
+### and 409 if they already entered.
+POST {{base}}/tournaments/{{tournamentId}}/entries
+Content-Type: application/json
+
+{
+  "playerId": {{playerId}}
+}
+
+### Entry status: QUEUED -> MATCHED -> FINISHED
+# @name entry
+GET {{base}}/tournaments/{{tournamentId}}/entries/{{playerId}}
+
+### Players waiting per country
+GET {{base}}/tournaments/{{tournamentId}}/queue
+
+### Overall leaderboard
+GET {{base}}/tournaments/{{tournamentId}}/leaderboard?limit=10
+
+### Leaderboard for one country
+GET {{base}}/tournaments/{{tournamentId}}/leaderboard?country=TR&limit=10
+
+### Stop accepting entries
+POST {{base}}/tournaments/{{tournamentId}}/close
+
+### ---------------------------------------------------------------- Matches
+
+### Match standings. Uses the matchId from the entry request above,
+### which is only set once the player has been matched.
+GET {{base}}/matches/{{entry.response.body.$.matchId}}
+
+### ---------------------------------------------------------------- Error examples
+
+### 404: unknown player
+GET {{base}}/players/999999
+
+### 400: validation error (blank username)
+POST {{base}}/players
+Content-Type: application/json
+
+{
+  "username": ""
+}

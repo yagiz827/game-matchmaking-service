@@ -82,6 +82,8 @@ To run the app from your IDE instead, start only the infrastructure with `docker
 
 `scripts/demo.sh` creates five players (one per country), levels them up to the entry requirement, enters them and prints the final leaderboard.
 
+To try individual endpoints, open [`requests.http`](requests.http) in VS Code with the [REST Client](https://marketplace.visualstudio.com/items?itemName=humao.rest-client) extension, or in IntelliJ, and click **Send Request**.
+
 ## API
 
 | Method | Path | Description |
